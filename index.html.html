@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hudson Shreve — Resume Tailor</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root {
+    --navy:   #1B2A4A;
+    --teal:   #2A7F8F;
+    --gold:   #C49A2A;
+    --cream:  #F8F5EF;
+    --mid:    #4A5568;
+    --light:  #F0EDE8;
+    --rule:   #CBD5E0;
+    --white:  #FFFFFF;
+    --danger: #C0392B;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--navy);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--navy);
+    padding: 28px 40px 24px;
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+    border-bottom: 3px solid var(--gold);
+  }
+  .header-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--white);
+    letter-spacing: -0.5px;
+  }
+  .header-sub {
+    font-size: 12px;
+    color: var(--teal);
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding-bottom: 4px;
+  }
+
+  /* ── Layout ── */
+  .app {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* ── API Key section ── */
+  .api-section {
+    background: var(--white);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .api-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #E2E8F0;
+    flex-shrink: 0;
+    transition: background 0.3s;
+  }
+  .api-dot.connected { background: #38A169; }
+  .api-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--mid);
+    white-space: nowrap;
+  }
+  .api-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-family: 'DM Sans', monospace;
+    font-size: 13px;
+    color: var(--navy);
+    background: transparent;
+  }
+  .api-save {
+    background: var(--navy);
+    color: var(--white);
+    border: none;
+    border-radius: 6px;
+    padding: 7px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: background 0.2s;
+  }
+  .api-save:hover { background: var(--teal); }
+
+  /* ── Main card ── */
+  .card {
+    background: var(--white);
+    border-radius: 14px;
+    border: 1px solid #E8E4DD;
+    overflow: hidden;
+    box-shadow: 0 2px 20px rgba(27,42,74,0.06);
+  }
+
+  .card-header {
+    background: var(--navy);
+    padding: 20px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: var(--white);
+  }
+  .step-badge {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  .card-body { padding: 28px; }
+
+  /* ── Tabs ── */
+  .tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 20px;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .tab {
+    flex: 1;
+    padding: 11px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    background: var(--light);
+    color: var(--mid);
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+  }
+  .tab.active {
+    background: var(--navy);
+    color: var(--white);
+  }
+  .tab:not(:last-child) { border-right: 1px solid var(--rule); }
+
+  /* ── Inputs ── */
+  .field { margin-bottom: 18px; }
+  label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--mid);
+    margin-bottom: 7px;
+  }
+  input[type=text], textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid #D8D3CC;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--navy);
+    background: var(--white);
+    outline: none;
+    transition: border-color 0.2s;
+    resize: vertical;
+  }
+  input[type=text]:focus, textarea:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(42,127,143,0.1);
+  }
+  textarea { min-height: 160px; line-height: 1.5; }
+
+  .row { display: flex; gap: 14px; }
+  .row .field { flex: 1; }
+
+  /* ── Generate button ── */
+  .btn-generate {
+    width: 100%;
+    padding: 16px;
+    background: var(--navy);
+    color: var(--white);
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .btn-generate:hover:not(:disabled) {
+    background: var(--teal);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(42,127,143,0.3);
+  }
+  .btn-generate:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* ── Progress ── */
+  .progress-wrap {
+    display: none;
+    margin-top: 24px;
+    padding: 20px 24px;
+    background: var(--light);
+    border-radius: 10px;
+    border: 1px solid #E0DAD2;
+  }
+  .progress-wrap.visible { display: block; }
+  .progress-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--navy);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .spinner {
+    width: 14px; height: 14px;
+    border: 2px solid var(--rule);
+    border-top-color: var(--teal);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .progress-bar-track {
+    height: 4px;
+    background: #E0DAD2;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--teal), var(--gold));
+    border-radius: 4px;
+    transition: width 0.6s ease;
+    width: 0%;
+  }
+
+  /* ── Result card ── */
+  .result-card {
+    display: none;
+    margin-top: 24px;
+    border: 2px solid var(--teal);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .result-card.visible { display: block; }
+  .result-header {
+    background: var(--teal);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .result-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--white);
+    letter-spacing: 0.5px;
+  }
+  .result-body { padding: 20px; background: var(--white); }
+
+  .result-meta {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .meta-pill {
+    background: var(--light);
+    border: 1px solid #E0DAD2;
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--navy);
+  }
+
+  .summary-preview {
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--mid);
+    padding: 14px 16px;
+    background: var(--light);
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-style: italic;
+  }
+
+  .competencies-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-bottom: 18px;
+  }
+  .comp-tag {
+    background: var(--navy);
+    color: var(--white);
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+  }
+
+  .btn-download {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 24px;
+    background: var(--gold);
+    color: var(--navy);
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    transition: all 0.2s;
+  }
+  .btn-download:hover {
+    background: #B8901F;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(196,154,42,0.35);
+  }
+
+  /* ── Error ── */
+  .error-box {
+    display: none;
+    margin-top: 18px;
+    padding: 14px 18px;
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--danger);
+    line-height: 1.5;
+  }
+  .error-box.visible { display: block; }
+
+  /* ── History ── */
+  .history-section {
+    margin-top: 36px;
+  }
+  .history-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--mid);
+    margin-bottom: 14px;
+    padding-left: 2px;
+  }
+  .history-list { display: flex; flex-direction: column; gap: 8px; }
+  .history-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--white);
+    border: 1px solid #E8E4DD;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .history-item:hover { border-color: var(--teal); }
+  .history-info { flex: 1; }
+  .history-role { font-size: 13px; font-weight: 600; color: var(--navy); }
+  .history-company { font-size: 12px; color: var(--mid); margin-top: 2px; }
+  .history-date { font-size: 11px; color: var(--rule); }
+  .history-dl {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--teal);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    padding-left: 12px;
+  }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="header-name">Hudson Shreve</div>
+  </div>
+  <div class="header-sub">Resume Tailoring Agent</div>
+</header>
+
+<div class="app">
+
+  <!-- API Key -->
+  <div class="api-section">
+    <div class="api-dot" id="apiDot"></div>
+    <span class="api-label">API Key</span>
+    <input class="api-input" type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." />
+    <button class="api-save" onclick="saveApiKey()">Save</button>
+  </div>
+
+  <!-- Main card -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Tailor a New Resume</span>
+      <span class="step-badge">Paste Job → Get PDF</span>
+    </div>
+    <div class="card-body">
+
+      <!-- Input tabs -->
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('url')">Job Posting URL</button>
+        <button class="tab" onclick="switchTab('paste')">Paste Description</button>
+      </div>
+
+      <div id="tab-url" class="tab-content active">
+        <div class="field">
+          <label>Job Posting URL</label>
+          <input type="text" id="jobUrl" placeholder="https://www.linkedin.com/jobs/view/... or any job board URL" />
+        </div>
+      </div>
+
+      <div id="tab-paste" class="tab-content">
+        <div class="field">
+          <label>Job Description</label>
+          <textarea id="jobText" placeholder="Paste the full job description here..."></textarea>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label>Job Title <span style="color:#A0AEC0;font-size:10px;font-weight:400">(optional — auto-detected)</span></label>
+          <input type="text" id="roleInput" placeholder="e.g. Regional Sales Manager" />
+        </div>
+        <div class="field">
+          <label>Company <span style="color:#A0AEC0;font-size:10px;font-weight:400">(optional — auto-detected)</span></label>
+          <input type="text" id="companyInput" placeholder="e.g. Fleetio" />
+        </div>
+      </div>
+
+      <button class="btn-generate" id="generateBtn" onclick="generateResume()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        Generate Tailored Resume
+      </button>
+
+      <!-- Progress -->
+      <div class="progress-wrap" id="progressWrap">
+        <div class="progress-label">
+          <div class="spinner"></div>
+          <span id="progressLabel">Fetching job description...</span>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="progressFill"></div>
+        </div>
+      </div>
+
+      <!-- Error -->
+      <div class="error-box" id="errorBox"></div>
+
+      <!-- Result -->
+      <div class="result-card" id="resultCard">
+        <div class="result-header">
+          <span class="result-title" id="resultTitle">Resume Ready</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div class="result-body">
+          <div class="result-meta" id="resultMeta"></div>
+          <div class="summary-preview" id="summaryPreview"></div>
+          <div class="competencies-grid" id="competenciesGrid"></div>
+          <button class="btn-download" id="downloadBtn" onclick="downloadPDF()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download PDF
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="history-section" id="historySection" style="display:none">
+    <div class="history-title">Generated Resumes</div>
+    <div class="history-list" id="historyList"></div>
+  </div>
+
+</div>
+
+<script>
+// ── Master Resume Data ──────────────────────────────────────────────────────
+const MASTER = {
+  personal: {
+    name: "Hudson Shreve",
+    location: "West Fork, AR (Northwest Arkansas)",
+    email: "hgshreve@gmail.com",
+    phone: "",
+    linkedin: "linkedin.com/in/hudson-shreve",
+    website: "hudson-shreve-portfolio.vercel.app"
+  },
+  experience: [
+    {
+      title: "District Sales Manager",
+      company: "ArcBest / MOLO Solutions",
+      location: "Northwest Arkansas, AR",
+      dates: "2022 – Present",
+      bullets: [
+        "Only DSM in region to exceed 100% of quota in 2025 while managing a team of 11 quota-carrying sellers",
+        "Promoted from Business Development Representative to District Sales Manager in 12 months",
+        "Built 6 AI-powered sales tools deployed in production: cold call grader, roleplay simulator, outbound prospecting engine, lead scraper, cold email agent, and inventory tracker",
+        "Designed and ran full enablement infrastructure: rep onboarding, coaching frameworks, call grading, and pipeline management processes",
+        "Closed new shipper accounts and managed enterprise freight relationships across transportation and logistics verticals",
+        "Used Apollo.io as core infrastructure for outbound prospecting, pipeline generation, and account targeting — and extended it with custom AI tooling",
+        "Managed multi-stakeholder deals with logistics, operations, and finance decision-makers",
+        "Standardized team sales process resulting in above-quota performance across the regional team"
+      ]
+    },
+    {
+      title: "Owner / Operator",
+      company: "Shreve Cleaning LLC",
+      location: "West Fork, AR",
+      dates: "2021 – Present",
+      bullets: [
+        "Founded and scaled commercial cleaning subcontracting business from $0 to $200K+ in annual revenue with 40%+ year-over-year growth",
+        "Managed full P&L including vendor relationships, client accounts, staffing, and operational systems",
+        "Served enterprise clients including Bank of America (6 locations), CSL Plasma, and Red River Sanitors",
+        "Built AI-powered operational tools including QC tracking app, inventory management system, and Slack-based workflow automation",
+        "Managed field staff of 4+ employees including a site supervisor across multiple concurrent locations",
+        "Maintained 45–55%+ gross margin targets per site through pricing strategy and cost management"
+      ]
+    },
+    {
+      title: "Business Development Representative",
+      company: "ArcBest / MOLO Solutions",
+      location: "Northwest Arkansas, AR",
+      dates: "2021 – 2022",
+      bullets: [
+        "Promoted to District Sales Manager within 12 months based on quota performance and leadership potential",
+        "Built outbound pipeline from scratch using Apollo.io for prospecting and multi-channel sequencing",
+        "Consistently exceeded new account acquisition targets in a high-velocity outbound environment"
+      ]
+    },
+    {
+      title: "Business Development Representative",
+      company: "Field Agent",
+      location: "Fayetteville, AR",
+      dates: "2019 – 2021",
+      bullets: [
+        "Sold SaaS retail intelligence platform to CPG brands, retailers, and market research agencies",
+        "Developed consultative selling skills in complex B2B SaaS environment",
+        "Built understanding of CPG retail dynamics, Walmart supplier ecosystem, and data-driven account strategy"
+      ]
+    }
+  ],
+  education: {
+    degree: "Bachelor of Science in Business Administration",
+    school: "University of Arkansas",
+    location: "Fayetteville, AR",
+    year: "2019"
+  },
+  metrics: {
+    quota: "100%+ quota attainment in 2025 (only DSM in region)",
+    team: "11 sellers managed",
+    ai_tools: "6 AI tools built and deployed in production",
+    promotion: "BDR to DSM in 12 months",
+    revenue: "$0 to $200K+ revenue (Shreve Cleaning), 40%+ YoY growth",
+    years: "8 years experience"
+  }
+};
+
+// ── State ───────────────────────────────────────────────────────────────────
+let currentTab = 'url';
+let lastTailored = null;
+let lastRole = '';
+let lastCompany = '';
+let history = JSON.parse(localStorage.getItem('resumeHistory') || '[]');
+
+// ── Init ────────────────────────────────────────────────────────────────────
+window.onload = () => {
+  const saved = localStorage.getItem('anthropicKey');
+  if (saved) {
+    document.getElementById('apiKeyInput').value = saved;
+    document.getElementById('apiDot').classList.add('connected');
+  }
+  renderHistory();
+};
+
+function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key.startsWith('sk-ant-')) {
+    showError('API key should start with sk-ant-');
+    return;
+  }
+  localStorage.setItem('anthropicKey', key);
+  document.getElementById('apiDot').classList.add('connected');
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', (i === 0 && tab === 'url') || (i === 1 && tab === 'paste'));
+  });
+  document.getElementById('tab-url').classList.toggle('active', tab === 'url');
+  document.getElementById('tab-paste').classList.toggle('active', tab === 'paste');
+}
+
+// ── Main flow ────────────────────────────────────────────────────────────────
+async function generateResume() {
+  const apiKey = localStorage.getItem('anthropicKey');
+  if (!apiKey) { showError('Please enter and save your Anthropic API key first.'); return; }
+
+  hideError();
+  document.getElementById('resultCard').classList.remove('visible');
+
+  const roleOverride    = document.getElementById('roleInput').value.trim();
+  const companyOverride = document.getElementById('companyInput').value.trim();
+
+  let jobText = '';
+
+  if (currentTab === 'url') {
+    const url = document.getElementById('jobUrl').value.trim();
+    if (!url) { showError('Please enter a job posting URL.'); return; }
+    setProgress(15, 'Fetching job description...');
+    jobText = await fetchJobViaProxy(url, apiKey);
+  } else {
+    jobText = document.getElementById('jobText').value.trim();
+    if (!jobText) { showError('Please paste a job description.'); return; }
+  }
+
+  if (jobText.length < 80) {
+    showError('Could not extract enough text from the URL. Try switching to "Paste Description" and paste the job text directly.');
+    hideProgress();
+    return;
+  }
+
+  setProgress(40, 'Tailoring resume with Claude...');
+  setGenerating(true);
+
+  try {
+    const tailored = await tailorWithClaude(apiKey, jobText, roleOverride, companyOverride);
+    setProgress(90, 'Building your PDF...');
+    lastTailored = tailored;
+    lastRole    = tailored.role;
+    lastCompany = tailored.company;
+    showResult(tailored);
+    saveToHistory(tailored);
+    setProgress(100, 'Done!');
+    setTimeout(hideProgress, 800);
+  } catch (err) {
+    showError('Claude API error: ' + err.message);
+    hideProgress();
+  }
+  setGenerating(false);
+}
+
+// ── Fetch job text via Claude (web search tool) ──────────────────────────────
+async function fetchJobViaProxy(url, apiKey) {
+  // Use Claude with web_search to fetch and parse the job description
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-beta': 'interleaved-thinking-2025-05-14'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 2000,
+        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+        messages: [{
+          role: 'user',
+          content: `Please fetch and extract the job description text from this URL: ${url}\n\nReturn ONLY the raw job description text — responsibilities, requirements, about the company, etc. No commentary, no formatting, just the text content of the job posting.`
+        }]
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    const textBlocks = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n');
+    return textBlocks.length > 100 ? textBlocks : '';
+  } catch(e) {
+    console.warn('Web fetch failed:', e.message);
+    return '';
+  }
+}
+
+// ── Tailor with Claude ───────────────────────────────────────────────────────
+async function tailorWithClaude(apiKey, jobText, roleOverride, companyOverride) {
+  const system = `You are an expert resume writer. Tailor the candidate's resume for a specific job.
+RULES:
+- Never fabricate metrics, companies, titles, or experiences not in the master data
+- Use keywords from the job description naturally
+- Write compelling action-oriented bullets (start with strong verbs)
+- Professional summary: 3-4 sentences, punchy and specific
+- Select 8-10 most relevant core competencies
+- Pick 4-6 most relevant experience bullets per role
+- Return ONLY valid JSON, no markdown, no commentary
+
+Return this exact JSON:
+{
+  "role": "detected or provided job title",
+  "company": "detected or provided company name",
+  "summary": "3-4 sentence tailored professional summary",
+  "core_competencies": ["competency 1", ...],
+  "experience": [
+    {
+      "title": "Job Title",
+      "company": "Company",
+      "location": "City, ST",
+      "dates": "YYYY – Present",
+      "bullets": ["bullet 1", ...]
+    }
+  ],
+  "skills": ["skill 1", "skill 2", ...]
+}`;
+
+  const userMsg = `TARGET ROLE: ${roleOverride || 'extract from job description'}
+TARGET COMPANY: ${companyOverride || 'extract from job description'}
+
+JOB DESCRIPTION:
+${jobText.slice(0, 5000)}
+
+CANDIDATE MASTER RESUME:
+${JSON.stringify(MASTER, null, 2)}
+
+Produce a tailored resume JSON.`;
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 3000,
+      system,
+      messages: [{ role: 'user', content: userMsg }]
+    })
+  });
+
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+
+  let raw = data.content[0].text.trim();
+  raw = raw.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'');
+  return JSON.parse(raw);
+}
+
+// ── Show result preview ──────────────────────────────────────────────────────
+function showResult(t) {
+  document.getElementById('resultTitle').textContent = `Resume Ready — ${t.role} at ${t.company}`;
+
+  const meta = document.getElementById('resultMeta');
+  meta.innerHTML = `
+    <span class="meta-pill">📋 ${t.role}</span>
+    <span class="meta-pill">🏢 ${t.company}</span>
+    <span class="meta-pill">📍 ${MASTER.personal.location}</span>
+  `;
+
+  document.getElementById('summaryPreview').textContent = t.summary;
+
+  const grid = document.getElementById('competenciesGrid');
+  grid.innerHTML = t.core_competencies.map(c => `<span class="comp-tag">${c}</span>`).join('');
+
+  document.getElementById('resultCard').classList.add('visible');
+  document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ── PDF Generation ───────────────────────────────────────────────────────────
+function downloadPDF() {
+  if (!lastTailored) return;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ format: 'letter', unit: 'pt' });
+
+  const W = 612, ML = 47, MR = 47, TW = W - ML - MR;
+  const NAVY  = [27, 42, 74];
+  const TEAL  = [42, 127, 143];
+  const GOLD  = [196, 154, 42];
+  const MID   = [74, 85, 104];
+  const RULE  = [203, 213, 224];
+  const DARK  = [45, 55, 72];
+
+  let y = 48;
+  const p = MASTER.personal;
+  const t = lastTailored;
+
+  // ── Name
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(24);
+  doc.setTextColor(...NAVY);
+  doc.text(p.name, ML, y);
+  y += 20;
+
+  // ── Role title
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.setTextColor(...TEAL);
+  doc.text(t.role, ML, y);
+  y += 14;
+
+  // ── Contact line
+  doc.setFontSize(8.5);
+  doc.setTextColor(...MID);
+  const contactParts = [p.location, p.email, p.linkedin, p.website].filter(Boolean);
+  doc.text(contactParts.join('   •   '), ML, y);
+  y += 10;
+
+  // ── Gold rule
+  doc.setDrawColor(...GOLD);
+  doc.setLineWidth(1.8);
+  doc.line(ML, y, W - MR, y);
+  y += 14;
+
+  // Helper: section header
+  const sectionHeader = (label) => {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(...NAVY);
+    const upper = label.toUpperCase();
+    doc.text(upper, ML, y);
+    y += 6;
+    doc.setDrawColor(...RULE);
+    doc.setLineWidth(0.5);
+    doc.line(ML, y, W - MR, y);
+    y += 10;
+  };
+
+  // Helper: wrapped text with return of new y
+  const wrappedText = (text, x, startY, maxW, lineH, color, fontStyle, size) => {
+    doc.setFont('helvetica', fontStyle || 'normal');
+    doc.setFontSize(size || 9);
+    doc.setTextColor(...(color || DARK));
+    const lines = doc.splitTextToSize(text, maxW);
+    doc.text(lines, x, startY);
+    return startY + lines.length * lineH;
+  };
+
+  // ── Summary
+  sectionHeader('Professional Summary');
+  y = wrappedText(t.summary, ML, y, TW, 13.5, DARK, 'normal', 9);
+  y += 10;
+
+  // ── Core Competencies (3 columns)
+  sectionHeader('Core Competencies');
+  const comps = t.core_competencies || [];
+  const colW = TW / 3;
+  const rows = [];
+  for (let i = 0; i < comps.length; i += 3) rows.push(comps.slice(i, i+3));
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.8);
+  doc.setTextColor(...DARK);
+  rows.forEach(row => {
+    row.forEach((c, ci) => {
+      doc.text('• ' + c, ML + ci * colW, y);
+    });
+    y += 13;
+  });
+  y += 6;
+
+  // ── Experience
+  sectionHeader('Professional Experience');
+  (t.experience || []).forEach(exp => {
+    // Title + company
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9.5);
+    doc.setTextColor(...NAVY);
+    doc.text(`${exp.title} — ${exp.company}`, ML, y);
+
+    // Dates (right-aligned)
+    doc.setFont('helvetica', 'oblique');
+    doc.setFontSize(8.5);
+    doc.setTextColor(...MID);
+    const dateStr = `${exp.location || ''}  |  ${exp.dates}`;
+    const dateW = doc.getTextWidth(dateStr);
+    doc.text(dateStr, W - MR - dateW, y);
+    y += 14;
+
+    // Bullets
+    (exp.bullets || []).forEach(b => {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.8);
+      doc.setTextColor(...DARK);
+      const lines = doc.splitTextToSize(b, TW - 14);
+      doc.text('•', ML, y);
+      doc.text(lines, ML + 10, y);
+      y += lines.length * 12.5 + 1;
+    });
+    y += 8;
+  });
+
+  // ── Tools
+  sectionHeader('Tools & Technology');
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(...DARK);
+  doc.text((t.skills || []).join('   •   '), ML, y);
+  y += 14;
+
+  // ── Education
+  sectionHeader('Education');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9.5);
+  doc.setTextColor(...NAVY);
+  const eduStr = `${MASTER.education.degree} — ${MASTER.education.school}`;
+  doc.text(eduStr, ML, y);
+  doc.setFont('helvetica', 'oblique');
+  doc.setFontSize(8.5);
+  doc.setTextColor(...MID);
+  const eduRight = `${MASTER.education.location}  |  ${MASTER.education.year}`;
+  const eduRW = doc.getTextWidth(eduRight);
+  doc.text(eduRight, W - MR - eduRW, y);
+  y += 18;
+
+  // ── Footer rule
+  doc.setDrawColor(...RULE);
+  doc.setLineWidth(0.5);
+  doc.line(ML, y, W - MR, y);
+  y += 10;
+  doc.setFont('helvetica', 'oblique');
+  doc.setFontSize(7.5);
+  doc.setTextColor(160, 174, 192);
+  const footerStr = `Tailored for ${t.role} at ${t.company}   •   ${p.linkedin}`;
+  const fw = doc.getTextWidth(footerStr);
+  doc.text(footerStr, (W - fw) / 2, y);
+
+  // Save
+  const safe = (s) => s.replace(/[^\w]/g, '_').slice(0, 25);
+  doc.save(`Resume_${safe(t.company)}_${safe(t.role)}.pdf`);
+}
+
+// ── History ──────────────────────────────────────────────────────────────────
+function saveToHistory(t) {
+  const entry = {
+    role: t.role, company: t.company,
+    date: new Date().toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }),
+    tailored: t
+  };
+  history.unshift(entry);
+  if (history.length > 20) history = history.slice(0, 20);
+  localStorage.setItem('resumeHistory', JSON.stringify(history));
+  renderHistory();
+}
+
+function renderHistory() {
+  const section = document.getElementById('historySection');
+  const list = document.getElementById('historyList');
+  if (history.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  list.innerHTML = history.map((h, i) => `
+    <div class="history-item" onclick="redownload(${i})">
+      <div class="history-info">
+        <div class="history-role">${h.role}</div>
+        <div class="history-company">${h.company}</div>
+      </div>
+      <span class="history-date">${h.date}</span>
+      <span class="history-dl">↓ PDF</span>
+    </div>
+  `).join('');
+}
+
+function redownload(i) {
+  lastTailored = history[i].tailored;
+  downloadPDF();
+}
+
+// ── UI helpers ────────────────────────────────────────────────────────────────
+function setGenerating(on) {
+  const btn = document.getElementById('generateBtn');
+  btn.disabled = on;
+  btn.innerHTML = on
+    ? '<div class="spinner" style="border-top-color:white;width:16px;height:16px;border-width:2px"></div> Generating...'
+    : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg> Generate Tailored Resume';
+}
+
+function setProgress(pct, label) {
+  document.getElementById('progressWrap').classList.add('visible');
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = label;
+}
+
+function hideProgress() {
+  document.getElementById('progressWrap').classList.remove('visible');
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorBox');
+  el.textContent = msg;
+  el.classList.add('visible');
+}
+
+function hideError() {
+  document.getElementById('errorBox').classList.remove('visible');
+}
+</script>
+</body>
+</html>
