@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hudson Shreve — Resume Tailor</title>
+<title>Resume Tailoring Agent</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
@@ -17,6 +17,7 @@
     --rule:   #CBD5E0;
     --white:  #FFFFFF;
     --danger: #C0392B;
+    --green:  #38A169;
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -77,7 +78,7 @@
     flex-shrink: 0;
     transition: background 0.3s;
   }
-  .api-dot.connected { background: #38A169; }
+  .api-dot.connected { background: var(--green); }
   .api-label {
     font-size: 12px;
     font-weight: 600;
@@ -109,6 +110,32 @@
   }
   .api-save:hover { background: var(--teal); }
 
+  /* ── Profile ready banner ── */
+  .profile-ready {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 22px;
+    background: var(--white);
+    border: 2px solid var(--teal);
+    border-radius: 10px;
+    margin-bottom: 28px;
+  }
+  .profile-ready-left { display: flex; align-items: center; gap: 12px; }
+  .profile-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+  .profile-name { font-weight: 600; font-size: 15px; color: var(--navy); }
+  .profile-meta { font-size: 12px; color: var(--mid); margin-top: 2px; }
+  .profile-actions { display: flex; gap: 8px; }
+  .btn-sm {
+    padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; letter-spacing: 0.3px;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .btn-edit { background: var(--light); border: 1px solid var(--rule); color: var(--mid); }
+  .btn-edit:hover { border-color: var(--teal); color: var(--teal); }
+  .btn-clear { background: none; border: 1px solid #FECACA; color: var(--danger); }
+  .btn-clear:hover { background: #FEF2F2; }
+
   /* ── Main card ── */
   .card {
     background: var(--white);
@@ -116,6 +143,7 @@
     border: 1px solid #E8E4DD;
     overflow: hidden;
     box-shadow: 0 2px 20px rgba(27,42,74,0.06);
+    margin-bottom: 28px;
   }
 
   .card-header {
@@ -140,6 +168,50 @@
 
   .card-body { padding: 28px; }
 
+  /* ── Upload zone ── */
+  .upload-zone {
+    border: 2px dashed var(--rule);
+    border-radius: 10px;
+    padding: 32px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--light);
+    user-select: none;
+  }
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: var(--teal);
+    background: rgba(42,127,143,0.05);
+  }
+  .upload-icon { color: var(--rule); margin-bottom: 10px; }
+  .upload-text { font-size: 14px; font-weight: 500; color: var(--mid); }
+  .upload-sub { font-size: 12px; color: var(--rule); margin-top: 4px; }
+
+  /* ── File list ── */
+  .file-list { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+  .file-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px;
+    background: var(--white);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--navy);
+  }
+  .file-item-name { display: flex; align-items: center; gap: 8px; }
+  .file-badge {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+    padding: 2px 6px; border-radius: 3px; text-transform: uppercase;
+  }
+  .file-badge.pdf { background: #FEE2E2; color: #C0392B; }
+  .file-badge.txt { background: #E0F2FE; color: #0369A1; }
+  .file-remove {
+    background: none; border: none; cursor: pointer;
+    color: var(--mid); font-size: 18px; padding: 0 4px;
+    line-height: 1; transition: color 0.15s;
+  }
+  .file-remove:hover { color: var(--danger); }
+
   /* ── Tabs ── */
   .tabs {
     display: flex;
@@ -160,6 +232,7 @@
     color: var(--mid);
     transition: all 0.2s;
     letter-spacing: 0.3px;
+    font-family: 'DM Sans', sans-serif;
   }
   .tab.active {
     background: var(--navy);
@@ -178,7 +251,7 @@
     color: var(--mid);
     margin-bottom: 7px;
   }
-  input[type=text], textarea {
+  input[type=text], input[type=password], textarea {
     width: 100%;
     padding: 11px 14px;
     border: 1px solid #D8D3CC;
@@ -191,7 +264,7 @@
     transition: border-color 0.2s;
     resize: vertical;
   }
-  input[type=text]:focus, textarea:focus {
+  input[type=text]:focus, input[type=password]:focus, textarea:focus {
     border-color: var(--teal);
     box-shadow: 0 0 0 3px rgba(42,127,143,0.1);
   }
@@ -377,9 +450,7 @@
   .error-box.visible { display: block; }
 
   /* ── History ── */
-  .history-section {
-    margin-top: 36px;
-  }
+  .history-section { margin-top: 36px; }
   .history-title {
     font-size: 11px;
     font-weight: 600;
@@ -423,9 +494,9 @@
 
 <header>
   <div>
-    <div class="header-name">Hudson Shreve</div>
+    <div class="header-name" id="headerName">Resume Tailoring Agent</div>
   </div>
-  <div class="header-sub">Resume Tailoring Agent</div>
+  <div class="header-sub">Powered by Claude</div>
 </header>
 
 <div class="app">
@@ -438,15 +509,93 @@
     <button class="api-save" onclick="saveApiKey()">Save</button>
   </div>
 
-  <!-- Main card -->
-  <div class="card">
+  <!-- Profile ready banner (shown when profile is loaded) -->
+  <div id="profileReady" class="profile-ready" style="display:none">
+    <div class="profile-ready-left">
+      <div class="profile-dot"></div>
+      <div>
+        <div class="profile-name" id="profileReadyName"></div>
+        <div class="profile-meta" id="profileReadyMeta"></div>
+      </div>
+    </div>
+    <div class="profile-actions">
+      <button class="btn-sm btn-edit" onclick="editProfile()">Edit Profile</button>
+      <button class="btn-sm btn-clear" onclick="clearProfile()">Clear</button>
+    </div>
+  </div>
+
+  <!-- Profile setup card (shown when no profile) -->
+  <div id="profileSetupCard" class="card">
     <div class="card-header">
-      <span class="card-title">Tailor a New Resume</span>
-      <span class="step-badge">Paste Job → Get PDF</span>
+      <span class="card-title">Set Up Your Profile</span>
+      <span class="step-badge">Step 1 of 2</span>
     </div>
     <div class="card-body">
 
-      <!-- Input tabs -->
+      <div class="field">
+        <label>Resume Files <span style="color:#A0AEC0;font-size:10px;font-weight:400">(.pdf or .txt — add one or more)</span></label>
+        <div class="upload-zone" id="uploadZone"
+          onclick="document.getElementById('fileInput').click()"
+          ondragover="handleDragOver(event)"
+          ondragleave="handleDragLeave(event)"
+          ondrop="handleDrop(event)">
+          <div class="upload-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+          <div class="upload-text">Drop resume files here or click to browse</div>
+          <div class="upload-sub">.pdf and .txt files accepted</div>
+        </div>
+        <input type="file" id="fileInput" multiple accept=".pdf,.txt" style="display:none" onchange="handleFileSelect(event)">
+        <div class="file-list" id="fileList"></div>
+      </div>
+
+      <div class="field">
+        <label>Profile URLs <span style="color:#A0AEC0;font-size:10px;font-weight:400">LinkedIn, portfolio, personal site...</span></label>
+        <input type="text" id="profileUrl1" placeholder="https://www.linkedin.com/in/yourname" />
+      </div>
+      <div class="row">
+        <div class="field">
+          <input type="text" id="profileUrl2" placeholder="https://yourportfolio.com" />
+        </div>
+        <div class="field">
+          <input type="text" id="profileUrl3" placeholder="Other URL..." />
+        </div>
+      </div>
+
+      <button class="btn-generate" id="buildBtn" onclick="buildProfile()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
+        </svg>
+        Build My Profile with Claude
+      </button>
+
+      <div class="progress-wrap" id="profileProgress">
+        <div class="progress-label">
+          <div class="spinner"></div>
+          <span id="profileProgressLabel">Processing...</span>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="profileProgressFill"></div>
+        </div>
+      </div>
+
+      <div class="error-box" id="profileError"></div>
+
+    </div>
+  </div>
+
+  <!-- Main generate card -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Tailor a New Resume</span>
+      <span class="step-badge">Step 2 — Paste Job → Get PDF</span>
+    </div>
+    <div class="card-body">
+
       <div class="tabs">
         <button class="tab active" onclick="switchTab('url')">Job Posting URL</button>
         <button class="tab" onclick="switchTab('paste')">Paste Description</button>
@@ -478,11 +627,14 @@
       </div>
 
       <button class="btn-generate" id="generateBtn" onclick="generateResume()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+          <path d="M2 17l10 5 10-5"/>
+          <path d="M2 12l10 5 10-5"/>
+        </svg>
         Generate Tailored Resume
       </button>
 
-      <!-- Progress -->
       <div class="progress-wrap" id="progressWrap">
         <div class="progress-label">
           <div class="spinner"></div>
@@ -493,21 +645,26 @@
         </div>
       </div>
 
-      <!-- Error -->
       <div class="error-box" id="errorBox"></div>
 
-      <!-- Result -->
       <div class="result-card" id="resultCard">
         <div class="result-header">
           <span class="result-title" id="resultTitle">Resume Ready</span>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
         </div>
         <div class="result-body">
           <div class="result-meta" id="resultMeta"></div>
           <div class="summary-preview" id="summaryPreview"></div>
           <div class="competencies-grid" id="competenciesGrid"></div>
           <button class="btn-download" id="downloadBtn" onclick="downloadPDF()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
             Download PDF
           </button>
         </div>
@@ -525,87 +682,9 @@
 </div>
 
 <script>
-// ── Master Resume Data ──────────────────────────────────────────────────────
-const MASTER = {
-  personal: {
-    name: "Hudson Shreve",
-    location: "West Fork, AR (Northwest Arkansas)",
-    email: "hgshreve@gmail.com",
-    phone: "",
-    linkedin: "linkedin.com/in/hudson-shreve",
-    website: "hudson-shreve-portfolio.vercel.app"
-  },
-  experience: [
-    {
-      title: "District Sales Manager",
-      company: "ArcBest / MOLO Solutions",
-      location: "Northwest Arkansas, AR",
-      dates: "2022 – Present",
-      bullets: [
-        "Only DSM in region to exceed 100% of quota in 2025 while managing a team of 11 quota-carrying sellers",
-        "Promoted from Business Development Representative to District Sales Manager in 12 months",
-        "Built 6 AI-powered sales tools deployed in production: cold call grader, roleplay simulator, outbound prospecting engine, lead scraper, cold email agent, and inventory tracker",
-        "Designed and ran full enablement infrastructure: rep onboarding, coaching frameworks, call grading, and pipeline management processes",
-        "Closed new shipper accounts and managed enterprise freight relationships across transportation and logistics verticals",
-        "Used Apollo.io as core infrastructure for outbound prospecting, pipeline generation, and account targeting — and extended it with custom AI tooling",
-        "Managed multi-stakeholder deals with logistics, operations, and finance decision-makers",
-        "Standardized team sales process resulting in above-quota performance across the regional team"
-      ]
-    },
-    {
-      title: "Owner / Operator",
-      company: "Shreve Cleaning LLC",
-      location: "West Fork, AR",
-      dates: "2021 – Present",
-      bullets: [
-        "Founded and scaled commercial cleaning subcontracting business from $0 to $200K+ in annual revenue with 40%+ year-over-year growth",
-        "Managed full P&L including vendor relationships, client accounts, staffing, and operational systems",
-        "Served enterprise clients including Bank of America (6 locations), CSL Plasma, and Red River Sanitors",
-        "Built AI-powered operational tools including QC tracking app, inventory management system, and Slack-based workflow automation",
-        "Managed field staff of 4+ employees including a site supervisor across multiple concurrent locations",
-        "Maintained 45–55%+ gross margin targets per site through pricing strategy and cost management"
-      ]
-    },
-    {
-      title: "Business Development Representative",
-      company: "ArcBest / MOLO Solutions",
-      location: "Northwest Arkansas, AR",
-      dates: "2021 – 2022",
-      bullets: [
-        "Promoted to District Sales Manager within 12 months based on quota performance and leadership potential",
-        "Built outbound pipeline from scratch using Apollo.io for prospecting and multi-channel sequencing",
-        "Consistently exceeded new account acquisition targets in a high-velocity outbound environment"
-      ]
-    },
-    {
-      title: "Business Development Representative",
-      company: "Field Agent",
-      location: "Fayetteville, AR",
-      dates: "2019 – 2021",
-      bullets: [
-        "Sold SaaS retail intelligence platform to CPG brands, retailers, and market research agencies",
-        "Developed consultative selling skills in complex B2B SaaS environment",
-        "Built understanding of CPG retail dynamics, Walmart supplier ecosystem, and data-driven account strategy"
-      ]
-    }
-  ],
-  education: {
-    degree: "Bachelor of Science in Business Administration",
-    school: "University of Arkansas",
-    location: "Fayetteville, AR",
-    year: "2019"
-  },
-  metrics: {
-    quota: "100%+ quota attainment in 2025 (only DSM in region)",
-    team: "11 sellers managed",
-    ai_tools: "6 AI tools built and deployed in production",
-    promotion: "BDR to DSM in 12 months",
-    revenue: "$0 to $200K+ revenue (Shreve Cleaning), 40%+ YoY growth",
-    years: "8 years experience"
-  }
-};
-
 // ── State ───────────────────────────────────────────────────────────────────
+let MASTER = JSON.parse(localStorage.getItem('userProfile') || 'null');
+let uploadedFiles = [];
 let currentTab = 'url';
 let lastTailored = null;
 let lastRole = '';
@@ -619,30 +698,325 @@ window.onload = () => {
     document.getElementById('apiKeyInput').value = saved;
     document.getElementById('apiDot').classList.add('connected');
   }
+  if (MASTER) {
+    showProfileReady();
+  }
   renderHistory();
 };
 
 function saveApiKey() {
   const key = document.getElementById('apiKeyInput').value.trim();
   if (!key.startsWith('sk-ant-')) {
-    showError('API key should start with sk-ant-');
+    showProfileError('API key should start with sk-ant-');
     return;
   }
   localStorage.setItem('anthropicKey', key);
   document.getElementById('apiDot').classList.add('connected');
 }
 
+// ── File Upload ──────────────────────────────────────────────────────────────
+function handleFileSelect(e) {
+  addFiles(Array.from(e.target.files));
+  e.target.value = '';
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.add('drag-over');
+}
+
+function handleDragLeave() {
+  document.getElementById('uploadZone').classList.remove('drag-over');
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.remove('drag-over');
+  const valid = Array.from(e.dataTransfer.files).filter(f =>
+    f.name.endsWith('.pdf') || f.name.endsWith('.txt')
+  );
+  addFiles(valid);
+}
+
+function addFiles(newFiles) {
+  for (const f of newFiles) {
+    if (!uploadedFiles.find(x => x.name === f.name)) {
+      uploadedFiles.push(f);
+    }
+  }
+  renderFileList();
+}
+
+function removeFile(name) {
+  uploadedFiles = uploadedFiles.filter(f => f.name !== name);
+  renderFileList();
+}
+
+function renderFileList() {
+  const list = document.getElementById('fileList');
+  if (uploadedFiles.length === 0) { list.innerHTML = ''; return; }
+  list.innerHTML = uploadedFiles.map(f => {
+    const ext = f.name.split('.').pop().toLowerCase();
+    const safeName = f.name.replace(/'/g, "\\'");
+    return `<div class="file-item">
+      <div class="file-item-name">
+        <span class="file-badge ${ext}">${ext}</span>
+        <span>${f.name}</span>
+      </div>
+      <button class="file-remove" onclick="removeFile('${safeName}')" title="Remove">×</button>
+    </div>`;
+  }).join('');
+}
+
+// ── File readers ─────────────────────────────────────────────────────────────
+function readFileAsBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function readFileAsText(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = reject;
+    reader.readAsText(file);
+  });
+}
+
+// ── Build Profile ─────────────────────────────────────────────────────────────
+async function buildProfile() {
+  const apiKey = localStorage.getItem('anthropicKey');
+  if (!apiKey) { showProfileError('Please enter and save your Anthropic API key first.'); return; }
+
+  const urls = [
+    document.getElementById('profileUrl1').value.trim(),
+    document.getElementById('profileUrl2').value.trim(),
+    document.getElementById('profileUrl3').value.trim()
+  ].filter(Boolean);
+
+  if (uploadedFiles.length === 0 && urls.length === 0) {
+    showProfileError('Please upload at least one resume file or add a profile URL.');
+    return;
+  }
+
+  hideProfileError();
+  setProfileProgress(5, 'Starting...');
+  document.getElementById('buildBtn').disabled = true;
+
+  try {
+    const contentBlocks = [];
+
+    // Process uploaded files
+    for (let i = 0; i < uploadedFiles.length; i++) {
+      const file = uploadedFiles[i];
+      setProfileProgress(10 + i * 10, `Reading ${file.name}...`);
+      if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
+        const base64 = await readFileAsBase64(file);
+        contentBlocks.push({ type: 'text', text: `Resume document: ${file.name}` });
+        contentBlocks.push({
+          type: 'document',
+          source: { type: 'base64', media_type: 'application/pdf', data: base64 }
+        });
+      } else {
+        const text = await readFileAsText(file);
+        contentBlocks.push({ type: 'text', text: `Resume file "${file.name}":\n\n${text}` });
+      }
+    }
+
+    // Fetch URL content
+    for (let i = 0; i < urls.length; i++) {
+      setProfileProgress(30 + i * 10, `Fetching ${new URL(urls[i]).hostname}...`);
+      const urlText = await fetchPageText(urls[i], apiKey);
+      if (urlText && urlText.length > 80) {
+        contentBlocks.push({ type: 'text', text: `Profile page (${urls[i]}):\n\n${urlText.slice(0, 6000)}` });
+      }
+    }
+
+    if (contentBlocks.length === 0) {
+      throw new Error('Could not extract any content from the provided files or URLs.');
+    }
+
+    setProfileProgress(65, 'Extracting profile with Claude...');
+
+    contentBlocks.push({
+      type: 'text',
+      text: `Based on the resume documents and profile content above, extract and synthesize the person's professional information into this exact JSON schema. Return ONLY valid JSON, no markdown, no commentary:
+
+{
+  "personal": {
+    "name": "Full Name",
+    "location": "City, State",
+    "email": "email@example.com",
+    "phone": "",
+    "linkedin": "linkedin.com/in/username",
+    "website": "website.com"
+  },
+  "experience": [
+    {
+      "title": "Job Title",
+      "company": "Company Name",
+      "location": "City, ST",
+      "dates": "YYYY – Present",
+      "bullets": ["specific accomplishment or responsibility with metrics where possible"]
+    }
+  ],
+  "education": {
+    "degree": "Degree Name",
+    "school": "University Name",
+    "location": "City, ST",
+    "year": "YYYY"
+  },
+  "metrics": {
+    "key_achievement": "quantified value or description"
+  }
+}
+
+Include ALL work experiences found. For metrics, extract any notable quantitative achievements (revenue, percentages, headcount, timelines, etc.). Use empty string for any field not found.`
+    });
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 4000,
+        system: 'You are a professional resume data extractor. Extract structured profile data from the provided resume content. Return only valid JSON matching the requested schema exactly.',
+        messages: [{ role: 'user', content: contentBlocks }]
+      })
+    });
+
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+
+    let raw = data.content[0].text.trim();
+    raw = raw.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'');
+    const profile = JSON.parse(raw);
+
+    if (!profile.personal || !profile.experience) {
+      throw new Error('Profile extraction incomplete — try adding more detail to your resume files.');
+    }
+
+    localStorage.setItem('userProfile', JSON.stringify(profile));
+    MASTER = profile;
+
+    setProfileProgress(100, 'Profile built!');
+    setTimeout(() => {
+      hideProfileProgress();
+      showProfileReady();
+    }, 700);
+
+  } catch (err) {
+    showProfileError('Error building profile: ' + err.message);
+    hideProfileProgress();
+  }
+
+  document.getElementById('buildBtn').disabled = false;
+}
+
+// ── Profile UI ────────────────────────────────────────────────────────────────
+function showProfileReady() {
+  document.getElementById('profileSetupCard').style.display = 'none';
+  document.getElementById('profileReady').style.display = 'flex';
+  const name = MASTER.personal?.name || 'Your Profile';
+  document.getElementById('profileReadyName').textContent = name;
+  document.getElementById('headerName').textContent = name;
+  const expCount = (MASTER.experience || []).length;
+  document.getElementById('profileReadyMeta').textContent =
+    `${expCount} position${expCount !== 1 ? 's' : ''} · Profile ready`;
+}
+
+function editProfile() {
+  document.getElementById('profileReady').style.display = 'none';
+  document.getElementById('profileSetupCard').style.display = 'block';
+}
+
+function clearProfile() {
+  if (!confirm('Clear your profile? This cannot be undone.')) return;
+  localStorage.removeItem('userProfile');
+  MASTER = null;
+  uploadedFiles = [];
+  document.getElementById('fileList').innerHTML = '';
+  document.getElementById('profileUrl1').value = '';
+  document.getElementById('profileUrl2').value = '';
+  document.getElementById('profileUrl3').value = '';
+  document.getElementById('profileReady').style.display = 'none';
+  document.getElementById('profileSetupCard').style.display = 'block';
+  document.getElementById('headerName').textContent = 'Resume Tailoring Agent';
+}
+
+// ── Profile progress/error helpers ───────────────────────────────────────────
+function setProfileProgress(pct, label) {
+  document.getElementById('profileProgress').classList.add('visible');
+  document.getElementById('profileProgressFill').style.width = pct + '%';
+  document.getElementById('profileProgressLabel').textContent = label;
+}
+
+function hideProfileProgress() {
+  document.getElementById('profileProgress').classList.remove('visible');
+}
+
+function showProfileError(msg) {
+  const el = document.getElementById('profileError');
+  el.textContent = msg;
+  el.classList.add('visible');
+}
+
+function hideProfileError() {
+  document.getElementById('profileError').classList.remove('visible');
+}
+
+// ── Fetch page text via Claude web_search ─────────────────────────────────────
+async function fetchPageText(url, apiKey) {
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-beta': 'interleaved-thinking-2025-05-14'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 2000,
+        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+        messages: [{
+          role: 'user',
+          content: `Please fetch and return the full text content from this URL: ${url}\n\nReturn ONLY the raw text content — no commentary, no formatting changes.`
+        }]
+      })
+    });
+    const data = await res.json();
+    if (data.error) return '';
+    return (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n');
+  } catch { return ''; }
+}
+
+// ── Tab switching ─────────────────────────────────────────────────────────────
 function switchTab(tab) {
   currentTab = tab;
-  document.querySelectorAll('.tab').forEach((t,i) => {
+  document.querySelectorAll('.tab').forEach((t, i) => {
     t.classList.toggle('active', (i === 0 && tab === 'url') || (i === 1 && tab === 'paste'));
   });
   document.getElementById('tab-url').classList.toggle('active', tab === 'url');
   document.getElementById('tab-paste').classList.toggle('active', tab === 'paste');
 }
 
-// ── Main flow ────────────────────────────────────────────────────────────────
+// ── Main generate flow ────────────────────────────────────────────────────────
 async function generateResume() {
+  if (!MASTER) {
+    showError('Please set up your profile first (Step 1 above).');
+    return;
+  }
+
   const apiKey = localStorage.getItem('anthropicKey');
   if (!apiKey) { showError('Please enter and save your Anthropic API key first.'); return; }
 
@@ -658,7 +1032,7 @@ async function generateResume() {
     const url = document.getElementById('jobUrl').value.trim();
     if (!url) { showError('Please enter a job posting URL.'); return; }
     setProgress(15, 'Fetching job description...');
-    jobText = await fetchJobViaProxy(url, apiKey);
+    jobText = await fetchPageText(url, apiKey);
   } else {
     jobText = document.getElementById('jobText').value.trim();
     if (!jobText) { showError('Please paste a job description.'); return; }
@@ -690,39 +1064,7 @@ async function generateResume() {
   setGenerating(false);
 }
 
-// ── Fetch job text via Claude (web search tool) ──────────────────────────────
-async function fetchJobViaProxy(url, apiKey) {
-  // Use Claude with web_search to fetch and parse the job description
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-beta': 'interleaved-thinking-2025-05-14'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 2000,
-        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-        messages: [{
-          role: 'user',
-          content: `Please fetch and extract the job description text from this URL: ${url}\n\nReturn ONLY the raw job description text — responsibilities, requirements, about the company, etc. No commentary, no formatting, just the text content of the job posting.`
-        }]
-      })
-    });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error.message);
-    const textBlocks = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n');
-    return textBlocks.length > 100 ? textBlocks : '';
-  } catch(e) {
-    console.warn('Web fetch failed:', e.message);
-    return '';
-  }
-}
-
-// ── Tailor with Claude ───────────────────────────────────────────────────────
+// ── Tailor with Claude ────────────────────────────────────────────────────────
 async function tailorWithClaude(apiKey, jobText, roleOverride, companyOverride) {
   const system = `You are an expert resume writer. Tailor the candidate's resume for a specific job.
 RULES:
@@ -739,17 +1081,17 @@ Return this exact JSON:
   "role": "detected or provided job title",
   "company": "detected or provided company name",
   "summary": "3-4 sentence tailored professional summary",
-  "core_competencies": ["competency 1", ...],
+  "core_competencies": ["competency 1"],
   "experience": [
     {
       "title": "Job Title",
       "company": "Company",
       "location": "City, ST",
       "dates": "YYYY – Present",
-      "bullets": ["bullet 1", ...]
+      "bullets": ["bullet 1"]
     }
   ],
-  "skills": ["skill 1", "skill 2", ...]
+  "skills": ["skill 1"]
 }`;
 
   const userMsg = `TARGET ROLE: ${roleOverride || 'extract from job description'}
@@ -786,29 +1128,29 @@ Produce a tailored resume JSON.`;
   return JSON.parse(raw);
 }
 
-// ── Show result preview ──────────────────────────────────────────────────────
+// ── Show result preview ───────────────────────────────────────────────────────
 function showResult(t) {
   document.getElementById('resultTitle').textContent = `Resume Ready — ${t.role} at ${t.company}`;
 
-  const meta = document.getElementById('resultMeta');
-  meta.innerHTML = `
-    <span class="meta-pill">📋 ${t.role}</span>
-    <span class="meta-pill">🏢 ${t.company}</span>
-    <span class="meta-pill">📍 ${MASTER.personal.location}</span>
+  const loc = MASTER.personal?.location || '';
+  document.getElementById('resultMeta').innerHTML = `
+    <span class="meta-pill">${t.role}</span>
+    <span class="meta-pill">${t.company}</span>
+    ${loc ? `<span class="meta-pill">${loc}</span>` : ''}
   `;
 
   document.getElementById('summaryPreview').textContent = t.summary;
 
-  const grid = document.getElementById('competenciesGrid');
-  grid.innerHTML = t.core_competencies.map(c => `<span class="comp-tag">${c}</span>`).join('');
+  document.getElementById('competenciesGrid').innerHTML =
+    t.core_competencies.map(c => `<span class="comp-tag">${c}</span>`).join('');
 
   document.getElementById('resultCard').classList.add('visible');
   document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-// ── PDF Generation ───────────────────────────────────────────────────────────
+// ── PDF Generation ────────────────────────────────────────────────────────────
 function downloadPDF() {
-  if (!lastTailored) return;
+  if (!lastTailored || !MASTER) return;
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ format: 'letter', unit: 'pt' });
 
@@ -821,43 +1163,37 @@ function downloadPDF() {
   const DARK  = [45, 55, 72];
 
   let y = 48;
-  const p = MASTER.personal;
+  const p = MASTER.personal || {};
   const t = lastTailored;
 
-  // ── Name
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(24);
   doc.setTextColor(...NAVY);
-  doc.text(p.name, ML, y);
+  doc.text(p.name || 'Resume', ML, y);
   y += 20;
 
-  // ── Role title
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
   doc.setTextColor(...TEAL);
   doc.text(t.role, ML, y);
   y += 14;
 
-  // ── Contact line
   doc.setFontSize(8.5);
   doc.setTextColor(...MID);
   const contactParts = [p.location, p.email, p.linkedin, p.website].filter(Boolean);
-  doc.text(contactParts.join('   •   '), ML, y);
+  if (contactParts.length) doc.text(contactParts.join('   •   '), ML, y);
   y += 10;
 
-  // ── Gold rule
   doc.setDrawColor(...GOLD);
   doc.setLineWidth(1.8);
   doc.line(ML, y, W - MR, y);
   y += 14;
 
-  // Helper: section header
   const sectionHeader = (label) => {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(8);
     doc.setTextColor(...NAVY);
-    const upper = label.toUpperCase();
-    doc.text(upper, ML, y);
+    doc.text(label.toUpperCase(), ML, y);
     y += 6;
     doc.setDrawColor(...RULE);
     doc.setLineWidth(0.5);
@@ -865,7 +1201,6 @@ function downloadPDF() {
     y += 10;
   };
 
-  // Helper: wrapped text with return of new y
   const wrappedText = (text, x, startY, maxW, lineH, color, fontStyle, size) => {
     doc.setFont('helvetica', fontStyle || 'normal');
     doc.setFontSize(size || 9);
@@ -875,38 +1210,31 @@ function downloadPDF() {
     return startY + lines.length * lineH;
   };
 
-  // ── Summary
   sectionHeader('Professional Summary');
   y = wrappedText(t.summary, ML, y, TW, 13.5, DARK, 'normal', 9);
   y += 10;
 
-  // ── Core Competencies (3 columns)
   sectionHeader('Core Competencies');
   const comps = t.core_competencies || [];
   const colW = TW / 3;
   const rows = [];
-  for (let i = 0; i < comps.length; i += 3) rows.push(comps.slice(i, i+3));
+  for (let i = 0; i < comps.length; i += 3) rows.push(comps.slice(i, i + 3));
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8.8);
   doc.setTextColor(...DARK);
   rows.forEach(row => {
-    row.forEach((c, ci) => {
-      doc.text('• ' + c, ML + ci * colW, y);
-    });
+    row.forEach((c, ci) => doc.text('• ' + c, ML + ci * colW, y));
     y += 13;
   });
   y += 6;
 
-  // ── Experience
   sectionHeader('Professional Experience');
   (t.experience || []).forEach(exp => {
-    // Title + company
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(9.5);
     doc.setTextColor(...NAVY);
     doc.text(`${exp.title} — ${exp.company}`, ML, y);
 
-    // Dates (right-aligned)
     doc.setFont('helvetica', 'oblique');
     doc.setFontSize(8.5);
     doc.setTextColor(...MID);
@@ -915,7 +1243,6 @@ function downloadPDF() {
     doc.text(dateStr, W - MR - dateW, y);
     y += 14;
 
-    // Bullets
     (exp.bullets || []).forEach(b => {
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8.8);
@@ -928,30 +1255,33 @@ function downloadPDF() {
     y += 8;
   });
 
-  // ── Tools
-  sectionHeader('Tools & Technology');
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  doc.setTextColor(...DARK);
-  doc.text((t.skills || []).join('   •   '), ML, y);
-  y += 14;
+  if (t.skills && t.skills.length) {
+    sectionHeader('Tools & Technology');
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(...DARK);
+    const skillLine = t.skills.join('   •   ');
+    const skillLines = doc.splitTextToSize(skillLine, TW);
+    doc.text(skillLines, ML, y);
+    y += skillLines.length * 13 + 4;
+  }
 
-  // ── Education
-  sectionHeader('Education');
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9.5);
-  doc.setTextColor(...NAVY);
-  const eduStr = `${MASTER.education.degree} — ${MASTER.education.school}`;
-  doc.text(eduStr, ML, y);
-  doc.setFont('helvetica', 'oblique');
-  doc.setFontSize(8.5);
-  doc.setTextColor(...MID);
-  const eduRight = `${MASTER.education.location}  |  ${MASTER.education.year}`;
-  const eduRW = doc.getTextWidth(eduRight);
-  doc.text(eduRight, W - MR - eduRW, y);
-  y += 18;
+  const edu = MASTER.education || {};
+  if (edu.degree) {
+    sectionHeader('Education');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9.5);
+    doc.setTextColor(...NAVY);
+    doc.text(`${edu.degree} — ${edu.school}`, ML, y);
+    doc.setFont('helvetica', 'oblique');
+    doc.setFontSize(8.5);
+    doc.setTextColor(...MID);
+    const eduRight = `${edu.location || ''}  |  ${edu.year || ''}`;
+    const eduRW = doc.getTextWidth(eduRight);
+    doc.text(eduRight, W - MR - eduRW, y);
+    y += 18;
+  }
 
-  // ── Footer rule
   doc.setDrawColor(...RULE);
   doc.setLineWidth(0.5);
   doc.line(ML, y, W - MR, y);
@@ -959,20 +1289,19 @@ function downloadPDF() {
   doc.setFont('helvetica', 'oblique');
   doc.setFontSize(7.5);
   doc.setTextColor(160, 174, 192);
-  const footerStr = `Tailored for ${t.role} at ${t.company}   •   ${p.linkedin}`;
+  const footerStr = `Tailored for ${t.role} at ${t.company}${p.linkedin ? '   •   ' + p.linkedin : ''}`;
   const fw = doc.getTextWidth(footerStr);
   doc.text(footerStr, (W - fw) / 2, y);
 
-  // Save
-  const safe = (s) => s.replace(/[^\w]/g, '_').slice(0, 25);
+  const safe = s => (s || 'resume').replace(/[^\w]/g, '_').slice(0, 25);
   doc.save(`Resume_${safe(t.company)}_${safe(t.role)}.pdf`);
 }
 
-// ── History ──────────────────────────────────────────────────────────────────
+// ── History ───────────────────────────────────────────────────────────────────
 function saveToHistory(t) {
   const entry = {
     role: t.role, company: t.company,
-    date: new Date().toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }),
+    date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
     tailored: t
   };
   history.unshift(entry);
